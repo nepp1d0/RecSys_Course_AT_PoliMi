@@ -310,13 +310,13 @@ class DataSplitter_leave_k_out(_DataSplitter):
 
         dataIO = DataIO(folder_path = save_folder_path)
 
-        split_parameters_dict = dataIO.load_data(file_name ="split_parameters" + name_suffix)
+        '''split_parameters_dict = dataIO.load_data(file_name ="split_parameters" + name_suffix)
 
         for attrib_name in split_parameters_dict.keys():
              self.__setattr__(attrib_name, split_parameters_dict[attrib_name])
 
 
-        self.SPLIT_GLOBAL_MAPPER_DICT = dataIO.load_data(file_name ="split_mappers" + name_suffix)
+        self.SPLIT_GLOBAL_MAPPER_DICT = dataIO.load_data(file_name ="split_mappers" + name_suffix)'''
 
         self.SPLIT_URM_DICT = dataIO.load_data(file_name ="split_URM" + name_suffix)
 

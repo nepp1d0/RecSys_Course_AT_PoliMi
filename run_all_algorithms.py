@@ -1,7 +1,7 @@
 
 from Recommenders.Recommender_import_list import *
 
-from Data_manager.Movielens.Movielens1MReader import Movielens1MReader
+from Data_manager.ChallengeDataset.ChallengeDataset import ChallengeDataset
 from Data_manager.DataSplitter_leave_k_out import DataSplitter_leave_k_out
 from Recommenders.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
 from Recommenders.BaseCBFRecommender import BaseItemCBFRecommender, BaseUserCBFRecommender
@@ -9,12 +9,10 @@ from Evaluation.Evaluator import EvaluatorHoldout
 import traceback, os
 
 
-def _get_instance(recommender_class, URM_train, ICM_all, UCM_all):
+def _get_instance(recommender_class, URM_train, ICM_all):
 
     if issubclass(recommender_class, BaseItemCBFRecommender):
         recommender_object = recommender_class(URM_train, ICM_all)
-    elif issubclass(recommender_class, BaseUserCBFRecommender):
-        recommender_object = recommender_class(URM_train, UCM_all)
     else:
         recommender_object = recommender_class(URM_train)
 
@@ -23,39 +21,20 @@ def _get_instance(recommender_class, URM_train, ICM_all, UCM_all):
 if __name__ == '__main__':
 
 
-    dataset_object = Movielens1MReader()
+    dataset_object = ChallengeDataset()
 
     dataSplitter = DataSplitter_leave_k_out(dataset_object, k_out_value=2)
 
     dataSplitter.load_data()
     URM_train, URM_validation, URM_test = dataSplitter.get_holdout_split()
     ICM_all = dataSplitter.get_loaded_ICM_dict()["ICM_genres"]
-    UCM_all = dataSplitter.get_loaded_UCM_dict()["UCM_all"]
 
     recommender_class_list = [
         Random,
         TopPop,
         GlobalEffects,
         SLIMElasticNetRecommender,
-        UserKNNCFRecommender,
-        IALSRecommender,
-        MatrixFactorization_BPR_Cython,
-        MatrixFactorization_FunkSVD_Cython,
-        MatrixFactorization_AsySVD_Cython,
-        EASE_R_Recommender,
-        ItemKNNCFRecommender,
-        P3alphaRecommender,
-        SLIM_BPR_Cython,
-        RP3betaRecommender,
-        PureSVDRecommender,
-        NMFRecommender,
-        UserKNNCBFRecommender,
-        ItemKNNCBFRecommender,
-        UserKNN_CFCBF_Hybrid_Recommender,
-        ItemKNN_CFCBF_Hybrid_Recommender,
-        LightFMCFRecommender,
-        LightFMUserHybridRecommender,
-        LightFMItemHybridRecommender,
+        IALSRecommender
         ]
 
 
@@ -87,7 +66,7 @@ if __name__ == '__main__':
 
             print("Algorithm: {}".format(recommender_class))
 
-            recommender_object = _get_instance(recommender_class, URM_train, ICM_all, UCM_all)
+            recommender_object = _get_instance(recommender_class, URM_train, ICM_all)
 
             if isinstance(recommender_object, Incremental_Training_Early_Stopping):
                 fit_params = {"epochs": 15, **earlystopping_keywargs}
@@ -100,7 +79,7 @@ if __name__ == '__main__':
 
             recommender_object.save_model(output_root_path, file_name = "temp_model.zip")
 
-            recommender_object = _get_instance(recommender_class, URM_train, ICM_all, UCM_all)
+            recommender_object = _get_instance(recommender_class, URM_train, ICM_all)
             recommender_object.load_model(output_root_path, file_name = "temp_model.zip")
 
             os.remove(output_root_path + "temp_model.zip")
