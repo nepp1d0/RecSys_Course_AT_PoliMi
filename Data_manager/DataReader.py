@@ -54,7 +54,7 @@ class DataReader(object):
 
     _DATA_READER_NAME = "DataReader"
 
-    def __init__(self, reload_from_original_data = False):
+    def __init__(self, reload_from_original_data = True):
         super(DataReader, self).__init__()
 
         self.DATASET_SPLIT_ROOT_FOLDER = os.path.join(os.path.dirname(__file__), '..', self.__DATASET_SPLIT_SUBFOLDER)

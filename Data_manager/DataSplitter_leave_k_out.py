@@ -310,13 +310,13 @@ class DataSplitter_leave_k_out(_DataSplitter):
 
         dataIO = DataIO(folder_path = save_folder_path)
 
-        '''split_parameters_dict = dataIO.load_data(file_name ="split_parameters" + name_suffix)
+        split_parameters_dict = dataIO.load_data(file_name ="split_parameters" + name_suffix)
 
         for attrib_name in split_parameters_dict.keys():
              self.__setattr__(attrib_name, split_parameters_dict[attrib_name])
 
 
-        self.SPLIT_GLOBAL_MAPPER_DICT = dataIO.load_data(file_name ="split_mappers" + name_suffix)'''
+        self.SPLIT_GLOBAL_MAPPER_DICT = dataIO.load_data(file_name ="split_mappers" + name_suffix)
 
         self.SPLIT_URM_DICT = dataIO.load_data(file_name ="split_URM" + name_suffix)
 
@@ -405,7 +405,7 @@ class DataSplitter_leave_k_out(_DataSplitter):
 
 
         assert assert_disjoint_matrices(list(self.SPLIT_URM_DICT.values()))
-
+        print(f"[DEBUG] split_icm_dict --> {self.SPLIT_ICM_DICT}")
         assert_URM_ICM_mapper_consistency(URM_DICT = self.SPLIT_URM_DICT,
                                           user_original_ID_to_index=self.SPLIT_GLOBAL_MAPPER_DICT["user_original_ID_to_index"],
                                           item_original_ID_to_index=self.SPLIT_GLOBAL_MAPPER_DICT["item_original_ID_to_index"],

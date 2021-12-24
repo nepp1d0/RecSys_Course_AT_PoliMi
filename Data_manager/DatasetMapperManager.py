@@ -199,6 +199,7 @@ class DatasetMapperManager(object):
         assert not self.__Dataset_finalized, "Dataset mappers have already been generated, adding new data is forbidden"
         assert ICM_name not in self.ICM_DICT, "ICM_name alredy exists"
         self.ICM_DICT[ICM_name] = ICM_dataframe
+        print(f"[DEBUG] added field {ICM_name} : {ICM_dataframe}")
 
 
 

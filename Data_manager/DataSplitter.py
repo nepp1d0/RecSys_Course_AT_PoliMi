@@ -88,7 +88,8 @@ class DataSplitter(object):
         # return self.get_dataset_object().get_loaded_ICM_dict()
 
         ICM_dict = {}
-
+        print(f"[DEBUG] self.get_loaded_ICM_names()--> {self.get_loaded_ICM_names()}")
+        print(f"[DEBUG] split_icm_dict --> {self.SPLIT_ICM_DICT}")
         for ICM_name in self.get_loaded_ICM_names():
 
             ICM_dict[ICM_name] = self.get_ICM_from_name(ICM_name)

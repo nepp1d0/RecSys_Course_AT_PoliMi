@@ -23,11 +23,11 @@ if __name__ == '__main__':
 
     dataset_object = ChallengeDataset()
 
-    dataSplitter = DataSplitter_leave_k_out(dataset_object, k_out_value=2)
+    dataSplitter = DataSplitter_leave_k_out(dataset_object, k_out_value=2,force_new_split = True)
 
     dataSplitter.load_data()
     URM_train, URM_validation, URM_test = dataSplitter.get_holdout_split()
-    ICM_all = dataSplitter.get_loaded_ICM_dict()["ICM_genres"]
+    ICM_all = dataSplitter.get_loaded_ICM_dict()["ICM_genre"]
 
     recommender_class_list = [
         Random,

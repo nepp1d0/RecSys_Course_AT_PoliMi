@@ -32,7 +32,6 @@ class ChallengeDataset(DataReader):
     def _load_from_original_file(self):
         # Load data from original
         zipFile_path =  self.DATASET_SPLIT_ROOT_FOLDER + self.DATASET_SUBFOLDER
-
         try:
 
             dataFile = zipfile.ZipFile(zipFile_path + "recommender-system-2021-challenge-polimi.zip")
@@ -65,7 +64,7 @@ class ChallengeDataset(DataReader):
         self._print("Loading Item Features channel")
         ICM_channel_dataframe= _loadICM_channel(ICM_channel_path)
 
-        self._print("Loading Item Features genres")
+        self._print("Loading Item Features genre")
         ICM_genres_dataframe= _loadICM_genres(ICM_genre_path)
 
         self._print("Loading Item Features event")
@@ -75,7 +74,7 @@ class ChallengeDataset(DataReader):
         dataset_manager = DatasetMapperManager()
         dataset_manager.add_URM(URM_all_dataframe, "URM_all")
         dataset_manager.add_ICM(ICM_genres_dataframe, "ICM_genre")
-        dataset_manager.add_ICM(ICM_subgenres_dataframe, "ICM_subgenres")
+        dataset_manager.add_ICM(ICM_subgenres_dataframe, "ICM_subgenre")
         dataset_manager.add_ICM(ICM_channel_dataframe, "ICM_channel")
         dataset_manager.add_ICM(ICM_event_dataframe, "ICM_event")
 
