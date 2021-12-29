@@ -13,7 +13,10 @@ import traceback
 import os, multiprocessing
 from functools import partial
 
+import scipy.sparse as sps
 
+from Data_manager.ChallengeDataset.ChallengeDataset import ChallengeDataset
+from Data_manager.DataSplitter_leave_k_out import DataSplitter_leave_k_out
 
 from Data_manager.Movielens.Movielens1MReader import Movielens1MReader
 from Data_manager.split_functions.split_train_validation_random_holdout import split_train_in_two_percentage_global_sample
@@ -35,11 +38,30 @@ def read_data_split_and_search():
 
 
 
-    dataReader = Movielens1MReader()
+    dataReader = ChallengeDataset()
     dataset = dataReader.load_data()
 
-    URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
-    URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
+    #URM_train, URM_test = split_train_in_two_percentage_global_sample(dataset.get_URM_all(), train_percentage = 0.80)
+    #URM_train, URM_validation = split_train_in_two_percentage_global_sample(URM_train, train_percentage = 0.80)
+
+    dataSplitter = DataSplitter_leave_k_out(dataReader, k_out_value=2,force_new_split = True)
+
+    dataSplitter.load_data()
+    URM_train, URM_validation, URM_test = dataSplitter.get_holdout_split()
+    ICM_genres = dataSplitter.get_loaded_ICM_dict()["ICM_genre"]
+    ICM_subgenres = dataSplitter.get_loaded_ICM_dict()["ICM_subgenre"]
+    ICM_channel = dataSplitter.get_loaded_ICM_dict()["ICM_channel"]
+    ICM_event = dataSplitter.get_loaded_ICM_dict()["ICM_event"]
+
+
+
+
+    #Stack URM and ICMs
+    stacked_URM = sps.vstack([URM_train, ICM_genres.T])
+    stacked_URM = sps.vstack([stacked_URM, ICM_subgenres.T])
+    stacked_URM = sps.vstack([stacked_URM, ICM_channel.T])
+    stacked_URM = sps.vstack([stacked_URM, ICM_event.T])
+    stacked_URM = sps.csr_matrix(stacked_URM)
 
     output_folder_path = "result_experiments/"
 
@@ -50,16 +72,16 @@ def read_data_split_and_search():
 
 
     collaborative_algorithm_list = [
-        Random,
-        TopPop,
-        P3alphaRecommender,
-        RP3betaRecommender,
-        ItemKNNCFRecommender,
-        UserKNNCFRecommender,
-        MatrixFactorization_BPR_Cython,
-        MatrixFactorization_FunkSVD_Cython,
-        PureSVDRecommender,
-        SLIM_BPR_Cython,
+        #Random,
+        #TopPop,
+        #P3alphaRecommender,
+        #RP3betaRecommender,
+        #ItemKNNCFRecommender,
+        #UserKNNCFRecommender,
+        #MatrixFactorization_BPR_Cython,
+        #MatrixFactorization_FunkSVD_Cython,
+        #PureSVDRecommender,
+        #SLIM_BPR_Cython,
         SLIMElasticNetRecommender
     ]
 
@@ -68,7 +90,7 @@ def read_data_split_and_search():
 
     from Evaluation.Evaluator import EvaluatorHoldout
 
-    cutoff_list = [5, 10, 20]
+    cutoff_list = [10, 20, 30]
     metric_to_optimize = "MAP"
     cutoff_to_optimize = 10
 
@@ -80,7 +102,7 @@ def read_data_split_and_search():
 
 
     runParameterSearch_Collaborative_partial = partial(runHyperparameterSearch_Collaborative,
-                                                       URM_train = URM_train,
+                                                       URM_train = stacked_URM,
                                                        metric_to_optimize = metric_to_optimize,
                                                        cutoff_to_optimize = cutoff_to_optimize,
                                                        n_cases = n_cases,
@@ -149,7 +171,7 @@ def read_data_split_and_search():
 
         try:
 
-            runHyperparameterSearch_Hybrid(ItemKNN_CFCBF_Hybrid_Recommender,
+            runHyperparameterSearch_Hybrid(MultiThreadSLIM_SLIMElasticNetRecommender,
                                         URM_train = URM_train,
                                         URM_train_last_test = URM_train + URM_validation,
                                         metric_to_optimize = metric_to_optimize,

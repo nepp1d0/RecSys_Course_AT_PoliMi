@@ -1,5 +1,6 @@
 
 from Recommenders.Recommender_import_list import *
+import scipy.sparse as sps
 
 from Data_manager.ChallengeDataset.ChallengeDataset import ChallengeDataset
 from Data_manager.DataSplitter_leave_k_out import DataSplitter_leave_k_out
@@ -27,14 +28,23 @@ if __name__ == '__main__':
 
     dataSplitter.load_data()
     URM_train, URM_validation, URM_test = dataSplitter.get_holdout_split()
-    ICM_all = dataSplitter.get_loaded_ICM_dict()["ICM_genre"]
+    ICM_genres = dataSplitter.get_loaded_ICM_dict()["ICM_genre"]
+    ICM_subgenres = dataSplitter.get_loaded_ICM_dict()["ICM_subgenre"]
+    ICM_channel = dataSplitter.get_loaded_ICM_dict()["ICM_channel"]
+    ICM_event = dataSplitter.get_loaded_ICM_dict()["ICM_event"]
 
-    recommender_class_list = [
-        Random,
-        TopPop,
-        GlobalEffects,
-        SLIMElasticNetRecommender,
-        IALSRecommender
+
+
+
+    #Stack URM and ICMs
+    stacked_URM = sps.vstack([URM_train, ICM_genres.T])
+    stacked_URM = sps.vstack([stacked_URM, ICM_subgenres.T])
+    stacked_URM = sps.vstack([stacked_URM, ICM_channel.T])
+    stacked_URM = sps.vstack([stacked_URM, ICM_event.T])
+    stacked_URM = sps.csr_matrix(stacked_URM)
+
+    recommender_class_list = [  
+        MultiThreadSLIM_SLIMElasticNetRecommender
         ]
 
 
@@ -44,7 +54,7 @@ if __name__ == '__main__':
 
     earlystopping_keywargs = {"validation_every_n": 5,
                               "stop_on_validation": True,
-                              "evaluator_object": EvaluatorHoldout(URM_validation, [20], exclude_seen=True),
+                              "evaluator_object": EvaluatorHoldout(URM_validation, [5, 10, 20], exclude_seen=True),
                               "lower_validations_allowed": 5,
                               "validation_metric": "MAP",
                               }
@@ -66,12 +76,18 @@ if __name__ == '__main__':
 
             print("Algorithm: {}".format(recommender_class))
 
-            recommender_object = _get_instance(recommender_class, URM_train, ICM_all)
+            recommender_object = _get_instance(recommender_class, stacked_URM, ICM_genres)
+
+            optimal_params= { 'alpha' : 0.007596772625600448,
+                                'l1_ratio': 0.09354638545594608,
+                                'topK': 410,
+                                'workers': 6 }
 
             if isinstance(recommender_object, Incremental_Training_Early_Stopping):
-                fit_params = {"epochs": 15, **earlystopping_keywargs}
+                fit_params = {  **optimal_params,
+                                **earlystopping_keywargs}
             else:
-                fit_params = {}
+                fit_params = {**optimal_params}
 
             recommender_object.fit(**fit_params)
 
@@ -79,15 +95,15 @@ if __name__ == '__main__':
 
             recommender_object.save_model(output_root_path, file_name = "temp_model.zip")
 
-            recommender_object = _get_instance(recommender_class, URM_train, ICM_all)
+            recommender_object = _get_instance(recommender_class, URM_train, ICM_genres)
             recommender_object.load_model(output_root_path, file_name = "temp_model.zip")
 
             os.remove(output_root_path + "temp_model.zip")
 
-            results_run_2, results_run_string_2 = evaluator.evaluateRecommender(recommender_object)
+            '''  results_run_2, results_run_string_2 = evaluator.evaluateRecommender(recommender_object)
 
             if recommender_class not in [Random]:
-                assert results_run_1.equals(results_run_2)
+                assert results_run_1.equals(results_run_2)'''
 
             print("Algorithm: {}, results: \n{}".format(recommender_class, results_run_string_1))
             logFile.write("Algorithm: {}, results: \n{}\n".format(recommender_class, results_run_string_1))
