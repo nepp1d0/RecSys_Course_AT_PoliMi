@@ -4,10 +4,11 @@ Created on 23/12/2020
 """
 
 
-
-from Base.BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
-from Base.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
-from Base.Recommender_utils import check_matrix
+import sys
+#sys.path.append("..") # Adds higher directory to python modules path.
+from Recommenders.BaseMatrixFactorizationRecommender import BaseMatrixFactorizationRecommender
+from Recommenders.Incremental_Training_Early_Stopping import Incremental_Training_Early_Stopping
+from Recommenders.Recommender_utils import check_matrix
 import implicit
 from tqdm import tqdm
 import numpy as np
